@@ -1,6 +1,6 @@
-from dataclasses import dataclass, asdict
-from enum import Enum, auto
 import typing
+from dataclasses import asdict, dataclass
+from enum import Enum, auto
 
 
 class QueueMessageStatus(Enum):
@@ -14,7 +14,7 @@ class QueueMessageStatus(Enum):
 class QueueMessage:
     event: str
     data: str
-    source: str = ''
+    source: str = ""
     retry: int = 0
     status: QueueMessageStatus = QueueMessageStatus.WAITING
 
@@ -25,7 +25,7 @@ class QueueMessage:
         }
 
 
-if __name__ == '__main__':
-    queue_message = QueueMessage(event='test_event', data='{"data": "some_data"}')
+if __name__ == "__main__":
+    queue_message = QueueMessage(event="test_event", data='{"data": "some_data"}')
     queue_message_dict = queue_message.to_serializable_dict()
     print(queue_message_dict)

@@ -1,20 +1,19 @@
+import asyncio
+import logging
+import typing
 from abc import ABC, abstractmethod
 from types import TracebackType
-import typing
-import asyncio
 from typing import override
-import logging
 
 from coredis import Redis
-
-
 from coredis.exceptions import (
     ConnectionError as RedisConnectionError,
+)
+from coredis.exceptions import (
     TimeoutError as RedisTimeoutError,
 )
 
-
-logger = logging.getLogger('rredis')
+logger = logging.getLogger("rredis")
 
 
 class BotConnectionError(Exception):
@@ -45,7 +44,7 @@ class Connection(ABC):
     @abstractmethod
     async def _close(self) -> None: ...
 
-    async def __aenter__(self) -> 'Connection':
+    async def __aenter__(self) -> "Connection":
         await self._connect()
         return self
 
@@ -84,24 +83,24 @@ class RedisConnection(Connection):
         try:
             return func(self._redis, *args, **kwargs)
         except (RedisConnectionError, RedisTimeoutError) as e:
-            logger.critical('cant push no redis conn, %s', e)
+            logger.critical("cant push no redis conn, %s", e)
 
     async def _push(self, redis: Redis[str], name: str, data: str) -> None:
         _ = await redis.rpush(name, [data])
 
     @override
     async def push(self, name: str, data: str) -> None:
-        return await self.call('_push', name, data)
+        return await self.call("_push", name, data)
 
     async def _pop(self, redis: Redis[str], name: str) -> str:
         temp: str | None = await redis.lpop(name)
         if temp and isinstance(temp, bytes):
-            return temp.decode('utf-8')
-        return typing.cast('str', temp)
+            return temp.decode("utf-8")
+        return typing.cast("str", temp)
 
     @override
     async def pop(self, name: str) -> str:
-        return await self.call('_pop', name)
+        return await self.call("_pop", name)
 
     async def _llen(self, redis: Redis[str], name: str) -> int:
         return await redis.llen(name)
@@ -115,22 +114,22 @@ class RedisConnection(Connection):
 
     @override
     async def walk(self, name: str) -> list[str]:
-        return await self.call('_walk', name=name)
+        return await self.call("_walk", name=name)
 
     async def _clean(self, redis: Redis[str], name: str) -> None:
         await redis.delete([name])
 
     @override
     async def clean(self, name: str) -> None:
-        return await self.call('_clean', name=name)
+        return await self.call("_clean", name=name)
 
 
 async def main() -> None:
-    async with RedisConnection('redis://localhost/1') as conn:
+    async with RedisConnection("redis://localhost/1") as conn:
         print(conn)
-        await conn.push('q', 'loki')
-        print(await conn.pop('q'))
+        await conn.push("q", "loki")
+        print(await conn.pop("q"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())
