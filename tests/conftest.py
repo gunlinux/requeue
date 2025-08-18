@@ -1,22 +1,22 @@
 import json
-from pathlib import Path
-import typing
 import logging
 import os
+import typing
+from pathlib import Path
 
 import pytest
 
-from requeue.schemas import QueueMessageSchema
 from requeue.requeue import Queue
 from requeue.rredis import Connection
+from requeue.schemas import QueueMessageSchema
 
 if typing.TYPE_CHECKING:
     from requeue.models import QueueMessage
 
 
-logging.getLogger('asyncio').setLevel(logging.WARNING)
+logging.getLogger("asyncio").setLevel(logging.WARNING)
 
-os.environ['TESTING'] = '1'
+os.environ["TESTING"] = "1"
 
 
 # Define the mock class
@@ -39,7 +39,7 @@ class MockRedis(Connection):
     @typing.override
     async def pop(self, name: str) -> str:
         if not self.data.get(name, []):
-            return ''
+            return ""
         return self.data[name].pop(0)
 
     @typing.override
@@ -68,13 +68,13 @@ def load_test_queue(name: str):
         async with mock_redis as connection:
             queue = Queue(name=name, connection=connection)
             with Path.open(
-                Path(f'tests/data/{name}.json'), 'r', encoding='utf-8'
+                Path(f"tests/data/{name}.json"), "r", encoding="utf-8"
             ) as test_data:
                 data = json.load(test_data)
             for item in data:
-                item['data'] = json.dumps(item['data'])
+                item["data"] = json.dumps(item["data"])
                 message: QueueMessage = typing.cast(
-                    'QueueMessage', QueueMessageSchema().load(item)
+                    "QueueMessage", QueueMessageSchema().load(item)
                 )
                 await queue.push(message)
             return queue
@@ -82,4 +82,4 @@ def load_test_queue(name: str):
     return load_test_queue_from_data
 
 
-load_da_events = load_test_queue('da_events')
+load_da_events = load_test_queue("da_events")

@@ -1,19 +1,19 @@
-import typing
+import asyncio
 import json
 import logging
-import asyncio
-from collections.abc import Callable, Awaitable
+import typing
+from collections.abc import Awaitable, Callable
 
 if typing.TYPE_CHECKING:
     from requeue.rredis import Connection
-from requeue.models import QueueMessageStatus, QueueMessage
+from requeue.models import QueueMessage, QueueMessageStatus
 from requeue.schemas import QueueMessageSchema
 
 logger = logging.getLogger(__name__)
 
 
 class Queue:
-    def __init__(self, name: str, connection: 'Connection', max_retry: int = 5) -> None:
+    def __init__(self, name: str, connection: "Connection", max_retry: int = 5) -> None:
         self.name: str = name
         self.last_id: str | None = None
         self.connection: Connection = connection
@@ -25,7 +25,7 @@ class Queue:
             data.status = QueueMessageStatus.WAITING
 
         if data.retry > self.max_retry:
-            logger.critical('message retried more than %s %s', self.max_retry, data)
+            logger.critical("message retried more than %s %s", self.max_retry, data)
             return
 
         queue_message_dict = data.to_serializable_dict()
@@ -36,7 +36,7 @@ class Queue:
         if not temp_data:
             return None
         message: QueueMessage = typing.cast(
-            'QueueMessage', QueueMessageSchema().load(json.loads(temp_data))
+            "QueueMessage", QueueMessageSchema().load(json.loads(temp_data))
         )
         message.status = QueueMessageStatus.PROCESSING
         return message
@@ -65,4 +65,4 @@ class Queue:
 
     @typing.override
     def __str__(self) -> str:
-        return f'<Queue {self.name}>'
+        return f"<Queue {self.name}>"
