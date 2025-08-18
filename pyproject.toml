@@ -36,7 +36,12 @@ select = ["E", "F", "I"]
 
 [tool.pyright]
 include = ["src"]
-exclude = ["**/__pycache__"]
+exclude = ["**/__pycache__", ".venv"]
+reportOptionalCall = false
+reportUnusedCallResult = false
+reportUnannotatedClassAttribute = false
+reportExplicitAny = false
+reportAny = false
 
 [tool.pytest.ini_options]
 addopts = "-p pytest_asyncio"
@@ -46,3 +51,4 @@ testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
+
