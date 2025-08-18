@@ -81,7 +81,7 @@ class RedisConnection(Connection):
             raise BotConnectionError
         func = getattr(self, action)
         try:
-            return func(self._redis, *args, **kwargs)
+            return await func(self._redis, *args, **kwargs)
         except (RedisConnectionError, RedisTimeoutError) as e:
             logger.critical("cant push no redis conn, %s", e)
 
@@ -122,14 +122,3 @@ class RedisConnection(Connection):
     @override
     async def clean(self, name: str) -> None:
         return await self.call("_clean", name=name)
-
-
-async def main() -> None:
-    async with RedisConnection("redis://localhost/1") as conn:
-        print(conn)
-        await conn.push("q", "loki")
-        print(await conn.pop("q"))
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
