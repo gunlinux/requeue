@@ -11,30 +11,36 @@ if TYPE_CHECKING:
     from requeue.models import QueueMessage
 
 
+def make_event_payload(event_name: str, extra: dict | None = None):
+    return {
+        "event": event_name,
+        "data": {
+            "user_name": "tester",
+            "amount": 10.5,
+            "currency": "USD",
+            "message": "hello world",
+            "event": extra or {"kinda": 1},
+        },
+        "source": "test_queue",
+        "retry": 0,
+        "status": QueueMessageStatus.WAITING.value,
+    }
+
+
 async def test_queue(mock_redis: Connection):
     async with mock_redis as connection:
         queue = Queue(name="test_queue", connection=connection)
 
-        payload1 = {
-            "event": "Test event 1",
-            "data": json.dumps({"kinda": 1}),
-            "source": "test_queue",
-            "retry": 0,
-            "status": QueueMessageStatus.WAITING.value,
-        }
-        payload2 = {
-            "event": "Test event 2",
-            "data": json.dumps({"kinda": 2}),
-            "source": "test_queue",
-            "retry": 0,
-            "status": QueueMessageStatus.WAITING.value,
-        }
+        payload1 = make_event_payload("Test event 1", {"kinda": 1})
+        payload2 = make_event_payload("Test event 2", {"kinda": 2})
+
         message_one: QueueMessage = typing.cast(
             "QueueMessage", QueueMessageSchema().load(payload1)
         )
         message_two: QueueMessage = typing.cast(
             "QueueMessage", QueueMessageSchema().load(payload2)
         )
+
         await queue.push(message_one)
         assert await queue.llen() == 1
         await queue.push(message_two)
@@ -45,6 +51,7 @@ async def test_queue(mock_redis: Connection):
         payload1["status"] = QueueMessageStatus.PROCESSING.value
         assert data_from_queue_1.to_serializable_dict() == payload1
         assert await queue.llen() == 1
+
         data_from_queue_2: QueueMessage | None = await queue.pop()
         assert data_from_queue_2 is not None
         payload2["status"] = QueueMessageStatus.PROCESSING.value
@@ -57,16 +64,9 @@ async def test_queue_opts(mock_redis: Connection):
     async with mock_redis as connection:
         queue = Queue(name="test_queue", connection=connection)
 
-        payload1 = {
-            "event": "Test event 1",
-            "data": json.dumps({"kinda": 1}),
-            "source": "test_queue",
-        }
-        payload2 = {
-            "event": "Test event 2",
-            "data": json.dumps({"kinda": 1}),
-            "source": "test_queue",
-        }
+        payload1 = make_event_payload("Test event 1", {"kinda": 1})
+        payload2 = make_event_payload("Test event 2", {"kinda": 2})
+
         message_one: QueueMessage = typing.cast(
             "QueueMessage", QueueMessageSchema().load(payload1)
         )
@@ -87,13 +87,7 @@ async def test_retry(mock_redis: Connection):
     async with mock_redis as connection:
         queue = Queue(name="test_queue", connection=connection)
 
-        payload1 = {
-            "event": "Test event 1",
-            "data": json.dumps({"kinda": 1}),
-            "source": "test_queue",
-            "retry": 0,
-            "status": QueueMessageStatus.WAITING.value,
-        }
+        payload1 = make_event_payload("Test event 1", {"kinda": 1})
         message_one: QueueMessage = typing.cast(
             "QueueMessage", QueueMessageSchema().load(payload1)
         )
@@ -103,5 +97,9 @@ async def test_retry(mock_redis: Connection):
             data_from_queue_1 = await queue.pop()
             if data_from_queue_1:
                 await queue.push(data_from_queue_1)
+        # after too many retries, it should go into failed queue
         assert await queue.llen() == 0
         assert await queue.pop() is None
+        # failed queue should contain 1
+        assert await queue.failed.llen() == 1
+
