@@ -17,10 +17,10 @@ class EventType(StrEnum):
 
 class QueueEventSchema(Schema):
     event_type = fields.String(required=True)
-    billing_system = fields.String(required=True, allow_none=True)
-    user_name = fields.String(required=True, allow_none=True)
-    amount = fields.Float(required=True, allow_none=True)
-    currency = fields.String(required=True, allow_none=True)
+    billing_system = fields.String(required=False, allow_none=True)
+    user_name = fields.String(required=False, allow_none=True)
+    amount = fields.Float(required=False, allow_none=True)
+    currency = fields.String(required=False, allow_none=True)
     message = fields.String(required=True, allow_none=True)
     event = fields.Dict(keys=fields.String(), values=fields.Raw(), allow_none=True)
 

@@ -16,9 +16,11 @@ def make_event_payload(event_name: str, extra: dict | None = None):
         "data": {
             "user_name": "tester",
             "amount": 10.5,
+            "billing_system": None,
             "currency": "USD",
             "message": "hello world",
-            "event": extra or {"kinda": 1},
+            "event_type": 'test_event',
+            "event": None,
         },
         "source": "test_queue",
         "retry": 0,
@@ -101,4 +103,3 @@ async def test_retry(mock_redis: Connection):
         assert await queue.pop() is None
         # failed queue should contain 1
         assert await queue.failed.llen() == 1
-

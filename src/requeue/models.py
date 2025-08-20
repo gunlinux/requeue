@@ -14,12 +14,12 @@ class QueueMessageStatus(Enum):
 @dataclass
 class QueueEvent:
     event_type: str
-    billing_system: str | None
-    user_name: str | None
-    amount: float | None
-    currency: str | None
-    message: str | None
-    event: dict[str, typing.Any] | None
+    billing_system: str | None = None
+    user_name: str | None = None
+    amount: float | None = None
+    currency: str | None = None
+    message: str | None = None
+    event: dict[str, typing.Any] | None = None
 
     def recal_amount(self, currencies: dict[str, float], currency: str = "RUB"):
         if self.currency == currency or not self.amount:
