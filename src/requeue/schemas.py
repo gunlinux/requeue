@@ -4,7 +4,7 @@ from enum import StrEnum
 from marshmallow import Schema, fields, post_load
 from marshmallow_enum import EnumField
 
-from requeue.models import QueueMessage, QueueMessageStatus
+from requeue.models import QueueMessage, QueueMessageStatus, QueueEvent
 
 
 class EventType(StrEnum):
@@ -16,11 +16,17 @@ class EventType(StrEnum):
 
 
 class QueueEventSchema(Schema):
+    event_type = fields.String(required=True)
+    billing_system = fields.String(required=True, allow_none=True)
     user_name = fields.String(required=True, allow_none=True)
     amount = fields.Float(required=True, allow_none=True)
     currency = fields.String(required=True, allow_none=True)
     message = fields.String(required=True, allow_none=True)
-    event = fields.Dict(keys=fields.String(), values=fields.Raw(), required=True)
+    event = fields.Dict(keys=fields.String(), values=fields.Raw(), allow_none=True)
+
+    @post_load
+    def make(self, data: dict[str, typing.Any], **_: typing.Any) -> QueueEvent:
+        return QueueEvent(**data)
 
 
 class QueueMessageSchema(Schema):

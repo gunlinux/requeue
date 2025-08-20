@@ -14,11 +14,21 @@ class QueueMessageStatus(Enum):
 @dataclass
 class QueueEvent:
     event_type: str
-    user_name: str
-    amount: float
-    currency: str
-    message: str
-    event: dict[str, typing.Any]
+    billing_system: str | None
+    user_name: str | None
+    amount: float | None
+    currency: str | None
+    message: str | None
+    event: dict[str, typing.Any] | None
+
+    def recal_amount(self, currencies: dict[str, float], currency: str = "RUB"):
+        if self.currency == currency or not self.amount:
+            return
+        if point := currencies.get(currency):
+            self.amount = point * self.amount
+            self.currency = currency
+            return
+        raise ValueError
 
 
 @dataclass
