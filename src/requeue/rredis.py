@@ -106,7 +106,7 @@ class RedisConnection(Connection):
 
     @override
     async def llen(self, name: str) -> int:
-        return await self.call(name)
+        return await self.call("_llen", name)
 
     async def _walk(self, redis: Redis[str], name: str) -> list[str]:
         return await redis.lrange(name, 0, -1)

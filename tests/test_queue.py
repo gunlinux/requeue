@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from requeue.models import QueueMessage
 
 
-def make_event_payload(event_name: str, extra: dict | None = None):
+def make_event_payload(event_name: str, _: dict | None = None):
     return {
         "event": event_name,
         "data": {
@@ -19,7 +19,7 @@ def make_event_payload(event_name: str, extra: dict | None = None):
             "billing_system": None,
             "currency": "USD",
             "message": "hello world",
-            "event_type": 'test_event',
+            "event_type": "test_event",
             "event": None,
         },
         "source": "test_queue",
