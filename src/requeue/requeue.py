@@ -46,6 +46,7 @@ class Queue:
         temp_data: str = await self.connection.pop(self.name)
         if not temp_data:
             return None
+        logger.critical("pop temp data %s", temp_data)
         message: QueueMessage = typing.cast(
             "QueueMessage", QueueMessageSchema().load(json.loads(temp_data))
         )
@@ -62,6 +63,7 @@ class Queue:
                 continue
             result = await on_message(new_event)
             if not result:
+                logger.critical("no result from on_message %", on_message.__name__)
                 continue
             await self.push(result)
 
