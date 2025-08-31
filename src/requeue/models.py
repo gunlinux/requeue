@@ -39,6 +39,9 @@ class QueueMessage:
     retry: int = 0
     status: QueueMessageStatus = QueueMessageStatus.WAITING
 
+    def finish(self):
+        self.status = QueueMessageStatus.FINISHED
+
     def to_serializable_dict(self) -> dict[str, typing.Any]:
         return {
             field: (value.value if isinstance(value, Enum) else value)

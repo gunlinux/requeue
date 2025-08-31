@@ -25,6 +25,9 @@ class Queue:
         return Queue(name=self._failed, connection=self.connection)
 
     async def push(self, data: QueueMessage) -> None:
+        if data.status == QueueMessageStatus.FINISHED:
+            return
+
         if data.status == QueueMessageStatus.PROCESSING:
             data.retry += 1
             data.status = QueueMessageStatus.WAITING

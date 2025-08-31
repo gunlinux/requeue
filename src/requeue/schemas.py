@@ -22,7 +22,9 @@ class QueueEventSchema(Schema):
     amount = fields.Float(required=False, allow_none=True)
     currency = fields.String(required=False, allow_none=True)
     message = fields.String(required=True, allow_none=True)
-    event = fields.Dict(keys=fields.String(), values=fields.Raw(), allow_none=True)
+    event = fields.Dict(
+        keys=fields.String(), values=fields.Raw(allow_none=True), allow_none=True
+    )
 
     @post_load
     def make(self, data: dict[str, typing.Any], **_: typing.Any) -> QueueEvent:
