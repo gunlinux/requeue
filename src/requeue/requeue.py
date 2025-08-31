@@ -15,16 +15,27 @@ logger = logging.getLogger(__name__)
 class Queue:
     def __init__(self, name: str, connection: "Connection", max_retry: int = 5) -> None:
         self.name: str = name
+        self._failed: str = f"{name}_failed"
         self.last_id: str | None = None
         self.connection: Connection = connection
         self.max_retry: int = max_retry
 
+    @property
+    def failed(self) -> "Queue":
+        return Queue(name=self._failed, connection=self.connection)
+
     async def push(self, data: QueueMessage) -> None:
+        if data.status == QueueMessageStatus.FINISHED:
+            return
+
         if data.status == QueueMessageStatus.PROCESSING:
             data.retry += 1
             data.status = QueueMessageStatus.WAITING
 
         if data.retry > self.max_retry:
+            data.status = QueueMessageStatus.FAILED
+            queue_message_dict = data.to_serializable_dict()
+            await self.connection.push(self._failed, json.dumps(queue_message_dict))
             logger.critical("message retried more than %s %s", self.max_retry, data)
             return
 
