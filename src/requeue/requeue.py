@@ -54,7 +54,7 @@ class Queue:
         return message
 
     async def consumer(
-        self, on_message: Callable[[QueueMessage], Awaitable[QueueMessage | None]]
+        self, on_message: Callable[[QueueMessage], Awaitable[QueueMessage]]
     ) -> None:
         while True:
             await asyncio.sleep(1)
