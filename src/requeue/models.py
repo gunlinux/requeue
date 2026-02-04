@@ -24,7 +24,7 @@ class QueueEvent:
     def recal_amount(self, currencies: dict[str, float], currency: str = "RUB"):
         if self.currency == currency or not self.amount:
             return
-        if point := currencies.get(f'{currency}RUB'):
+        if point := currencies.get(f"{currency}RUB"):
             self.amount = point * self.amount
             self.currency = currency
             return

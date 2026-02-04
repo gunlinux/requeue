@@ -43,7 +43,7 @@ class Connection(ABC):
     @abstractmethod
     async def _close(self) -> None: ...
 
-    async def __aenter__(self) -> "Connection":
+    async def __aenter__(self) -> typing.Self:
         await self._connect()
         return self
 
