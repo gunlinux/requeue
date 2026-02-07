@@ -21,15 +21,6 @@ class QueueEvent:
     message: str | None = None
     event: dict[str, typing.Any] | None = None
 
-    def recal_amount(self, currencies: dict[str, float], currency: str = "RUB"):
-        if self.currency == currency or not self.amount:
-            return
-        if point := currencies.get(f"{currency}RUB"):
-            self.amount = point * self.amount
-            self.currency = currency
-            return
-        raise ValueError
-
 
 @dataclass
 class QueueMessage:
