@@ -1,6 +1,6 @@
 [project]
 name = "requeue"
-version = "0.6.0"
+version = "0.7.0"
 description = "Add your description here"
 readme = "README.md"
 authors = [
@@ -8,10 +8,7 @@ authors = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "coredis>=5.0.1",
     "faststream>=0.6.7",
-    "marshmallow>=4.0.0",
-    "marshmallow-enum>=1.5.1",
 ]
 
 [project.scripts]
