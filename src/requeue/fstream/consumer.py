@@ -44,5 +44,5 @@ class RabbitConsumer:
             self.logger.warning("worker function failed with error %s", e)
             await msg.reject()
 
-    async def consume(self, sleep_time: float | None):
+    async def consume(self, sleep_time: float | None = None):
         await self._app.run(sleep_time=sleep_time or self.sleep_time)
