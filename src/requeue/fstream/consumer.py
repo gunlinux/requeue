@@ -16,11 +16,13 @@ class RabbitConsumer:
         worker: Callable[[FQueueMessage], Awaitable[None]],
         dlq_exchange: str = "dlq",
         logger: logging.Logger | None = None,
+        sleep_time: float = 0.01,
     ) -> None:
         self.logger = logging.getLogger() if logger is None else logger
         self.dlq_exchange = dlq_exchange
         self.worker = worker
         self._app = FastStream(broker)
+        self.sleep_time = sleep_time
         broker.subscriber(
             queue=RabbitQueue(
                 queue_name,
@@ -42,5 +44,5 @@ class RabbitConsumer:
             self.logger.warning("worker function failed with error %s", e)
             await msg.reject()
 
-    async def consume(self):
-        await self._app.run()
+    async def consume(self, sleep_time: float | None):
+        await self._app.run(sleep_time=sleep_time or self.sleep_time)
