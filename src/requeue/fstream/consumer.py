@@ -1,4 +1,4 @@
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Sequence
 import logging
 
 from faststream import FastStream, AckPolicy
@@ -17,11 +17,12 @@ class RabbitConsumer:
         dlq_exchange: str = "dlq",
         logger: logging.Logger | None = None,
         sleep_time: float = 0.01,
+        after_shutdown: Sequence["Callable"] = (),
     ) -> None:
         self.logger = logging.getLogger() if logger is None else logger
         self.dlq_exchange = dlq_exchange
         self.worker = worker
-        self._app = FastStream(broker)
+        self._app = FastStream(broker, on_shutdown=after_shutdown)
         self.sleep_time = sleep_time
         broker.subscriber(
             queue=RabbitQueue(
